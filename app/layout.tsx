@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ThirdwebProvider activeChain={Rinkeby}>
+    <ThirdwebProvider activeChain={Rinkeby} clientId="your-client-id">
       <html lang="en">
         <body className={`${inter.variable} ${anton.variable}`}>
           {children}
