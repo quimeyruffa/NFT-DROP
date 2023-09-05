@@ -9,9 +9,12 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-anton)'],
-        mono: ['var(--font-roboto-mono)'],
+        mono: ['var(--font-inter)'],
       },
+      letterSpacing: {
+        standar: '0.3em',}
     },
+    
   },
   plugins: [],
 }
