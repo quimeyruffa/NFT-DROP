@@ -9,6 +9,45 @@ import Link from "next/link";
 
 export default function Page({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<any>();
+  const getServerSideProps = async (params: any) => {
+    const query = `*[_type == "post" && slug.current == $id][0]{
+        _id,
+        title,
+        address,
+        description,
+        nftCollectionName,
+        mainImage{
+          asset
+        },
+        previewImage{
+          asset
+        },
+        slug{
+          current
+        },
+        author ->{
+          _id,
+          name,
+          address,
+          slug{
+            current
+          },
+        },
+      }`;
+
+    const post = await client.fetch(query, {
+      id: params?.id,
+    });
+
+    if (!post) {
+      return {
+        notFound: true,
+      };
+    }
+    return {
+      post,
+    };
+  };
 
   // Auth
   const connectWithMetamask = useMetamask();
@@ -90,43 +129,3 @@ export default function Page({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
-export const getServerSideProps = async (params: any) => {
-  const query = `*[_type == "post" && slug.current == $id][0]{
-      _id,
-      title,
-      address,
-      description,
-      nftCollectionName,
-      mainImage{
-        asset
-      },
-      previewImage{
-        asset
-      },
-      slug{
-        current
-      },
-      author ->{
-        _id,
-        name,
-        address,
-        slug{
-          current
-        },
-      },
-    }`;
-
-  const post = await client.fetch(query, {
-    id: params?.id,
-  });
-
-  if (!post) {
-    return {
-      notFound: true,
-    };
-  }
-  return {
-    post,
-  };
-};

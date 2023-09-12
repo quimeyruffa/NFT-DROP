@@ -5,39 +5,38 @@ import { urlForImage } from "@/sanity/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 
-export const getServerSideProps = async () => {
-  const query = `*[_type == "post"]{
-    _id,
-    title,
-    address,
-    description,
-    nftCollectionName,
-    mainImage{
-      asset
-    },
-    previewImage{
-      asset
-    },
-    slug{
-      current
-    },
-    author ->{
+export default async function Home() {
+  const getServerSideProps = async () => {
+    const query = `*[_type == "post"]{
       _id,
-      name,
+      title,
       address,
+      description,
+      nftCollectionName,
+      mainImage{
+        asset
+      },
+      previewImage{
+        asset
+      },
       slug{
         current
       },
-    },
-  }`;
+      author ->{
+        _id,
+        name,
+        address,
+        slug{
+          current
+        },
+      },
+    }`;
 
-  const post = await client.fetch(query);
+    const post = await client.fetch(query);
 
-  return post as Post[];
-};
-export default async function Home() {
+    return post as Post[];
+  };
   const post = (await getServerSideProps()) as Post[];
-  console.log(post);
   return (
     <ThirdwebProvider activeChain={Rinkeby}>
       <div className="max-w-7xl mx-auto flex-col  flex min-h-screen py-20 px-10 2xl:px-0">
