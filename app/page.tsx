@@ -45,7 +45,7 @@ export default async function Home() {
             {post.map((p) => (
               <Link href={`/nft/${p.slug.current}`}>
                 <div className="flex flex-col items-center cursor-pointer transition-all duration-200 hover:scale-105">
-                  <img
+                  <Image
                     className="h-96 w-60 rounded-2xl object-cover"
                     src={urlForImage(p.mainImage).url()}
                     alt=""

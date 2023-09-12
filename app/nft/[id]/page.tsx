@@ -56,7 +56,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     getPost();
-  }, []);
+  }, [params]);
 
   const getPost = async () => {
     const posts = await getServerSideProps(params);
@@ -67,7 +67,7 @@ export default function Page({ params }: { params: { id: string } }) {
     <div className="flex flex-1 h-screen flex-col lg:grid lg:grid-cols-10">
       <div className=" lg:col-span-5 bg-gradient-to-r from-[#FFDE59] to-[#FF914D] flex items-center justify-center py-2 lg:min-h-screen  ">
         <div>
-          <img
+          <Image
             className=" lg:h-80 md:h-60 h-40 object-cover "
             src="https://res.cloudinary.com/dv8hvjcim/image/upload/v1693874582/dmb7crscyfgjysx6lg1r.svg"
             alt="arteofyou"
@@ -107,7 +107,7 @@ export default function Page({ params }: { params: { id: string } }) {
         {/* Content */}
         <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:space-y-0 lg:justify-center">
           {post?.mainImage && (
-            <img
+            <Image
               className="w-80 object-cover pb-10 lg:h-40"
               src={urlForImage(post?.mainImage).url()}
               alt="NFT APes"
