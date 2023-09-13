@@ -1,14 +1,27 @@
 "use client";
-import { useAddress, useDisconnect, useMetamask } from "@thirdweb-dev/react";
+import {
+  useAddress,
+  useDisconnect,
+  useMetamask,
+  useNFTDrop,
+} from "@thirdweb-dev/react";
 import Image from "next/image";
-import png from "../../f72570921cab407c11a39c8e1717f5607718e14d-2951x2430.webp";
 import { client } from "@/sanity/lib/client";
 import { useEffect, useState } from "react";
 import { urlForImage } from "@/sanity/lib/image";
 import Link from "next/link";
+import { BigNumber } from "ethers";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Page({ params }: { params: { id: string } }) {
+  const [claimedSupply, setClaimedSupply] = useState<number>(0);
+  const [totalSupply, setTotalSupply] = useState<BigNumber>();
+  const [itemMinted, setItemMinted] = useState<object>({});
+  const [priceInEth, setPriceInEth] = useState<string>();
+  const [loading, setLoading] = useState<boolean>(true);
   const [post, setPost] = useState<any>();
+  const nftDrop = useNFTDrop(post?.address);
+
   const getServerSideProps = async (params: any) => {
     const query = `*[_type == "post" && slug.current == $id][0]{
         _id,
@@ -49,6 +62,56 @@ export default function Page({ params }: { params: { id: string } }) {
     };
   };
 
+  const mintNft = () => {
+    if (!nftDrop || !address) return;
+    const quantity = 1;
+    setLoading(true);
+    const notification = toast.loading("Minting...", {
+      style: {
+        background: "white",
+        color: "green",
+        fontWeight: "bolder",
+        fontSize: "17px",
+        padding: "20px",
+      },
+    });
+
+    nftDrop
+      ?.claimTo(address, quantity)
+      .then(async (tx) => {
+        const receipt = tx[0].receipt;
+        const claimedTokenId = tx[0].id;
+        const claimedNFT = await tx[0].data();
+
+        setItemMinted(tx[0]);
+
+        toast("HOORAY.. You Successfully Minted!", {
+          duration: 800,
+          style: {
+            background: "white",
+            color: "green",
+            fontWeight: "bolder",
+            fontSize: "17px",
+            padding: "20px",
+          },
+        });
+      })
+      .catch((err) => {
+        toast("Whoops.. Something went wrong!", {
+          style: {
+            background: "red",
+            color: "white",
+            fontWeight: "bolder",
+            fontSize: "17px",
+            padding: "20px",
+          },
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+        toast.dismiss(notification);
+      });
+  };
   // Auth
   const connectWithMetamask = useMetamask();
   const address = useAddress();
@@ -59,6 +122,33 @@ export default function Page({ params }: { params: { id: string } }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
+  useEffect(() => {
+    if (!nftDrop) return;
+
+    const fetchPrice = async () => {
+      const claimConditions = await nftDrop.claimConditions.getAll();
+      setPriceInEth(claimConditions?.[0].currencyMetadata.displayValue);
+    };
+
+    fetchPrice();
+  }, [itemMinted, nftDrop]);
+
+  useEffect(() => {
+    if (!nftDrop) return;
+    const fetchNFTDropData = async () => {
+      setLoading(true);
+      const claimed = await nftDrop.getAllClaimed();
+      const total = await nftDrop.totalSupply();
+
+      setClaimedSupply(claimed.length);
+      setTotalSupply(total);
+
+      setLoading(false);
+    };
+
+    fetchNFTDropData();
+  }, [nftDrop, itemMinted]);
+
   const getPost = async () => {
     const posts = await getServerSideProps(params);
     setPost(posts.post);
@@ -66,6 +156,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   return (
     <div className="flex flex-1 h-screen flex-col lg:grid lg:grid-cols-10">
+      <Toaster position="bottom-center" containerClassName="font-mono" />
       <div className=" lg:col-span-5 bg-gradient-to-r from-[#FFDE59] to-[#FF914D] flex items-center justify-center py-2 lg:min-h-screen  ">
         <div>
           <Image
@@ -106,25 +197,53 @@ export default function Page({ params }: { params: { id: string } }) {
         )}
 
         {/* Content */}
-        <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:space-y-0 lg:justify-center">
-          {post?.mainImage && (
-            <Image
-              className="w-80 object-cover pb-10 lg:h-40"
-              src={urlForImage(post?.mainImage).url()}
-              alt="NFT APes"
-            />
-          )}
-          <h1 className="text-3xl font-bold lg:text-5xl lg:font-extrabold font-mono">
-            {post && post?.title}
-          </h1>
-          <p className="pt-2 text-xl text-green-500 font-mono ">
-            13/21 NFT&apos;s Claimed
-          </p>
-        </div>
-        {/* Mint Button */}
+        {loading && post ? (
+          <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:space-y-0 lg:justify-center">
+            <p className="pt-2 text-xl text-green-500 font-mono animate-pulse">
+              <Image
+                className="h-80 w-80 object-contain"
+                src="https://cdn.hackernoon.com/images/0*4Gzjgh9Y7Gu8KEtZ.gif"
+                alt="loader"
+              />
+            </p>
+          </div>
+        ) : (
+          <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:space-y-0 lg:justify-center">
+            {post?.mainImage && (
+              <Image
+                className="w-80 object-cover pb-10 lg:h-40"
+                src={urlForImage(post?.mainImage).url()}
+                alt="NFT APes"
+              />
+            )}
+            <h1 className="text-3xl font-bold lg:text-5xl lg:font-extrabold font-mono">
+              {post && post?.title}
+            </h1>
+            {!loading && (
+              <p className="pt-2 text-xl text-green-500 font-mono ">
+                {claimedSupply}/{totalSupply?.toString()} NFT&apos;s Claimed
+              </p>
+            )}
+          </div>
+        )}
 
-        <button className="h-16 bg-red-600 text-white rounded-full font-mono font-semibold">
-          Mint NFT (0.01 ETH)
+        {/* Mint Button */}
+        <button
+          onClick={mintNft}
+          disabled={
+            loading || claimedSupply === totalSupply?.toNumber() || !address
+          }
+          className="h-16 bg-red-600 text-white rounded-full font-mono font-semibold disabled:bg-gray-400"
+        >
+          {loading ? (
+            <>Loading</>
+          ) : claimedSupply === totalSupply?.toNumber() ? (
+            <>SOLD OUT</>
+          ) : !address ? (
+            <>Sign in to Mint</>
+          ) : (
+            <span className="font-bold ">Mint NFT ({priceInEth} ETH)</span>
+          )}
         </button>
       </div>
     </div>
