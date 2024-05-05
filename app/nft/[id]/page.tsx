@@ -8,6 +8,7 @@ import {
   useNFTDrop,
 } from "@thirdweb-dev/react";
 import { BigNumber } from "ethers";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -158,7 +159,7 @@ export default function Page({ params }: { params: { id: string } }) {
       <Toaster position="bottom-center" containerClassName="font-mono" />
       <div className=" lg:col-span-5 bg-gradient-to-r from-[#FFDE59] to-[#FF914D] flex items-center justify-center py-2 lg:min-h-screen  ">
         <div>
-          <img
+          <Image
             className=" lg:h-80 md:h-60 h-40 object-cover "
             src="https://res.cloudinary.com/dv8hvjcim/image/upload/v1693874582/dmb7crscyfgjysx6lg1r.svg"
             alt="arteofyou"
@@ -199,10 +200,10 @@ export default function Page({ params }: { params: { id: string } }) {
         {loading && post ? (
           <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:space-y-0 lg:justify-center">
             <p className="pt-2 text-xl text-green-500 font-mono animate-pulse">
-              <img
+              <Image
                 className="h-80 w-80 object-contain"
                 src="https://cdn.hackernoon.com/images/0*4Gzjgh9Y7Gu8KEtZ.gif"
-                // unoptimized={true}
+                unoptimized={true}
                 alt="loader"
               />
             </p>
@@ -210,7 +211,7 @@ export default function Page({ params }: { params: { id: string } }) {
         ) : (
           <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:space-y-0 lg:justify-center">
             {post?.mainImage && (
-              <img
+              <Image
                 className="w-80 object-cover pb-10 lg:h-40"
                 src={urlForImage(post?.mainImage).url()}
                 alt="NFT APes"
