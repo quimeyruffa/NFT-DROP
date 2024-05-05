@@ -30,8 +30,8 @@ export default function DefaultModal(props: any) {
               />
               <div className="ml-2 font-mono">
                 <p className="text-violet-950 font-bold">Attributes</p>
-                {itemMinted.metadata.attributes.map((item: any) => (
-                  <div>
+                {itemMinted.metadata.attributes.map((item: any, index: number) => (
+                  <div key={`item-modal${index}`}>
                     <span>{item.trait_type}: </span>
                     <span>{item.value}</span>
                   </div>
