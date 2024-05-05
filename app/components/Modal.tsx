@@ -9,7 +9,7 @@ export default function DefaultModal(props: any) {
 
   return (
     <>
-      <Modal show={false} onClose={() => setOpenModal(false)}>
+      <Modal show={false} onClose={() => setOpenModal(false)} key='modal-mintNft'>
         <Modal.Body>
           <div className="space-y-6 flex justify-center flex-col text-2xl items-center">
             <div className="absolute">
